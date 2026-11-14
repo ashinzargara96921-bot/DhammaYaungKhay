@@ -1,44 +1,24 @@
-name: Build DhammaYaungKhay APK
+
+name: Inspect DhammaYaungKhay ZIP
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/build-apk.yml'
 
 jobs:
-  build:
+  inspect:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Extract Android project
+      - name: Inspect ZIP contents
         run: |
-          unzip -o ./*.zip -d ./project
-
-      - name: Build APK
-        run: |
-          GRADLEW=$(find project -name gradlew -type f | head -n 1)
-          if [ -z "$GRADLEW" ]; then
-            echo "gradlew not found"
-            exit 1
-          fi
-          cd "$(dirname "$GRADLEW")"
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: DhammaYaungKhay-APK
-          path: project/**/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-
+          echo "ZIP FILES:"
+          find . -maxdepth 2 -type f
+          echo "EXTRACTING:"
+          mkdir -p project
+          unzip -o ./*.zip -d project
+          echo "PROJECT FILES:"
+          find project -name gradlew -o -name settings.gradle -o -name build.gradle
+          echo "DIRECTORIES:"
+          find project -maxdepth 4 -type d
